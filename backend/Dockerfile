@@ -7,12 +7,12 @@ COPY go.mod ./
 RUN go mod download
 
 COPY . .
-
-RUN CGO_ENABLED=0 GOOS=linux go mod tidy && go build -o main
+ENV CGO_ENABLED=0 GOOS=linux 
+RUN go mod tidy && go build -o main
 
 FROM alpine:latest
 
-WORKDIR /app
+WORKDIR /backend
 
 COPY --from=builder /backend/main .
 
