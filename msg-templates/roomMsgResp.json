@@ -1,0 +1,7 @@
+{
+  "id": "roomId",
+  "name": "roomName",
+  "width": "width",
+  "height": "height",
+  "dirtiness": "valueOfDirtinessRoom"
+}
