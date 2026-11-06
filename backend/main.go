@@ -4,44 +4,40 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"sync"
 )
 
-type Counter struct {
-	mu    sync.Mutex
-	value int
+type RoomRequest struct {
+	ClientID string `json:"clientId"`
+	RoomID   int    `json:"roomId"`
 }
 
-func (c *Counter) Increment() int {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	c.value++
-	return c.value
-}
-
-func (c *Counter) Get() int {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	return c.value
+type RoomResponse struct {
+	ID        int     `json:"id"`
+	Name      string  `json:"name"`
+	Width     int     `json:"width"`
+	Height    int     `json:"height"`
+	Dirtiness float64 `json:"dirtiness"`
 }
 
 func main() {
 
-	counter := &Counter{}
-
-	http.HandleFunc("POST /increment", func(w http.ResponseWriter, r *http.Request) {
-		n := counter.Increment()
-		w.Header().Set("Content-Type", "application/json")
-		err := json.NewEncoder(w).Encode(map[string]int{"count": n})
-		if err != nil {
+	http.HandleFunc("POST /rooms/get", func(w http.ResponseWriter, r *http.Request) {
+		var req RoomRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-	})
 
-	http.HandleFunc("GET /count", func(w http.ResponseWriter, r *http.Request) {
+		resp := RoomResponse{
+			ID:        req.RoomID,
+			Name:      "Комната",
+			Width:     20,
+			Height:    20,
+			Dirtiness: 0.5,
+		}
 		w.Header().Set("Content-Type", "application/json")
-		err := json.NewEncoder(w).Encode(map[string]int{"count": counter.Get()})
-		if err != nil {
+		if err := json.NewEncoder(w).Encode(resp); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 	})
