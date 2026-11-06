@@ -1,13 +1,46 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"sync"
 )
 
+type Counter struct {
+	mu    sync.Mutex
+	value int
+}
+
+func (c *Counter) Increment() int {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.value++
+	return c.value
+}
+
+func (c *Counter) Get() int {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return c.value
+}
+
 func main() {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		_, err := fmt.Fprintln(w, "First time when pochistyam is working")
+
+	counter := &Counter{}
+
+	http.HandleFunc("POST /increment", func(w http.ResponseWriter, r *http.Request) {
+		n := counter.Increment()
+		w.Header().Set("Content-Type", "application/json")
+		err := json.NewEncoder(w).Encode(map[string]int{"count": n})
+		if err != nil {
+			return
+		}
+	})
+
+	http.HandleFunc("GET /count", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		err := json.NewEncoder(w).Encode(map[string]int{"count": counter.Get()})
 		if err != nil {
 			return
 		}
@@ -18,39 +51,3 @@ func main() {
 		return
 	}
 }
-
-const indexHTML = `<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="utf-8">
-  <title>По чистям</title>
-</head>
-<body>
-  <h1>Счетчик нажатий</h1>
-  <button id="btn">Нажми меня</button>
-  <p>Нажато: <span id="count">0</span></p>
-
-  <script>
-    const btn = document.getElementById('btn');
-    const countEl = document.getElementById('count');
-
-    // При загрузке страницы подтягиваем текущее значение
-    fetch('/count')
-      .then(r => r.json())
-      .then(data => { countEl.textContent = data.count; })
-      .catch(err => console.error(err));
-
-    btn.addEventListener('click', async () => {
-      try {
-        const res = await fetch('/increment', { method: 'POST' });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const data = await res.json();
-        countEl.textContent = data.count;
-      } catch (err) {
-        console.error('Ошибка:', err);
-        countEl.textContent = 'ошибка';
-      }
-    });
-  </script>
-</body>
-</html>`
