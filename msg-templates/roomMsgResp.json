@@ -3,6 +3,6 @@
   "name": "roomName",
   "width": 2,
   "height": 3,
-  "dirtiness": "valueOfDirtinessRoom",
+  "dirtiness": 0.0,
   "needsCleaning": true
 }
