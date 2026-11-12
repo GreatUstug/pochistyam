@@ -1,8 +1,8 @@
 {
   "id": 1,
   "name": "roomName",
-  "width": 2,
-  "height": 3,
+  "width": 2.0,
+  "height": 3.0,
   "dirtiness": 0.0,
   "needsCleaning": true
 }

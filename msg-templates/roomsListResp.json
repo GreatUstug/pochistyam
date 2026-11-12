@@ -1,0 +1,18 @@
+{
+  "rooms": [
+    { "id": "roomUUID",
+      "name": "Комната_1",
+      "width": 2.0,
+      "height": 3.0,
+      "dirtiness": 0.9,
+      "needsCleaning": true
+    },
+    { "id": "roomUUID",
+      "name": "Комната_2",
+      "width": 4.0,
+      "height": 3.0,
+      "dirtiness": 0.4,
+      "needsCleaning": false
+    }
+  ]
+}
