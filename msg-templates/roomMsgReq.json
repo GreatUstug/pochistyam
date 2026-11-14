@@ -1,4 +1,4 @@
 {
-  "client-id": "clientId",
-  "id": "roomId"
+  "clientId": "clientUUID",
+  "id": 1
 }
