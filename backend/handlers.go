@@ -51,3 +51,29 @@ func (app *App) CreateRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+func (app *App) GetAllRooms(w http.ResponseWriter, r *http.Request) {
+	rows, err := app.DB.Pool.Query(r.Context(), "SELECT * FROM rooms WHERE user_id = $1 ORDER BY id ASC", "1")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+	rooms := []RoomResponse{}
+	for rows.Next() {
+		var room RoomResponse
+		if err := rows.Scan(&room.ID, &room.Name, &room.Width, &room.Height); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		rooms = append(rooms, room)
+	}
+	if err := rows.Err(); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(rooms); err != nil {
+		return
+	}
+}
