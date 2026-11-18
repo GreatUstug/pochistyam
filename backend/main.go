@@ -3,7 +3,9 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
+	"os"
 )
 
 type RoomRequest struct {
@@ -11,17 +13,23 @@ type RoomRequest struct {
 	RoomID   int    `json:"roomId"`
 }
 
-type RoomResponse struct {
-	ID        int     `json:"id"`
-	Name      string  `json:"name"`
-	Width     int     `json:"width"`
-	Height    int     `json:"height"`
-	Dirtiness float64 `json:"dirtiness"`
+type App struct {
+	DB *DB
 }
 
 func main() {
+	dsn := os.Getenv("DATABASE_URL")
+	if dsn == "" {
+		log.Fatal("DATABASE_URL environment variable not set")
+	}
+	database := NewDB(dsn)
+	defer database.Pool.Close()
+	app := &App{database}
 
-	http.HandleFunc("POST /rooms/get", func(w http.ResponseWriter, r *http.Request) {
+	mux := http.NewServeMux()
+
+	// заглушка
+	mux.HandleFunc("POST /rooms/get", func(w http.ResponseWriter, r *http.Request) {
 		var req RoomRequest
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -29,11 +37,12 @@ func main() {
 		}
 
 		resp := RoomResponse{
-			ID:        req.RoomID,
-			Name:      "Комната",
-			Width:     20,
-			Height:    20,
-			Dirtiness: 0.5,
+			ID:            req.RoomID,
+			Name:          "Комната",
+			Width:         20,
+			Height:        20,
+			Dirtiness:     0.8,
+			NeedsCleaning: true,
 		}
 		w.Header().Set("Content-Type", "application/json")
 		if err := json.NewEncoder(w).Encode(resp); err != nil {
@@ -41,8 +50,9 @@ func main() {
 			return
 		}
 	})
+
 	fmt.Println("Listening on port 8080")
-	err := http.ListenAndServe(":8080", nil)
+	err := http.ListenAndServe(":8080", mux)
 	if err != nil {
 		return
 	}
