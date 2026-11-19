@@ -6,7 +6,7 @@ import (
 )
 
 type RoomResponse struct {
-	ID            int     `json:"id"`
+	ID            string  `json:"id"`
 	Name          string  `json:"name"`
 	Width         int     `json:"width"`
 	Height        int     `json:"height"`
@@ -39,6 +39,8 @@ func (app *App) CreateRoom(w http.ResponseWriter, r *http.Request) {
 		&room.Name,
 		&room.Width,
 		&room.Height,
+		&room.Dirtiness,
+		&room.NeedsCleaning,
 	)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
