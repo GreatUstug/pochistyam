@@ -27,7 +27,7 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("POST /create", app.CreateRoom)
+	mux.HandleFunc("POST /createRoom", app.CreateRoom)
 	mux.HandleFunc("GET /rooms", app.GetAllRooms)
 
 	fmt.Println("Listening on port 8080")
