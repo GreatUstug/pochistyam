@@ -55,7 +55,7 @@ func (app *App) CreateRoom(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *App) GetAllRooms(w http.ResponseWriter, r *http.Request) {
-	rows, err := app.DB.Pool.Query(r.Context(), "SELECT * FROM rooms WHERE user_id = $1 ORDER BY id ASC", "1")
+	rows, err := app.DB.Pool.Query(r.Context(), "SELECT id, name, width, height, dirtiness, needs_cleaning FROM rooms WHERE user_id = $1 ORDER BY id ASC", "1")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -64,7 +64,7 @@ func (app *App) GetAllRooms(w http.ResponseWriter, r *http.Request) {
 	rooms := []RoomResponse{}
 	for rows.Next() {
 		var room RoomResponse
-		if err := rows.Scan(&room.ID, &room.Name, &room.Width, &room.Height); err != nil {
+		if err := rows.Scan(&room.ID, &room.Name, &room.Width, &room.Height, &room.Dirtiness, &room.NeedsCleaning); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -75,7 +75,7 @@ func (app *App) GetAllRooms(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(rooms); err != nil {
+	if err := json.NewEncoder(w).Encode(map[string]interface{}{"rooms": rooms}); err != nil {
 		return
 	}
 }
