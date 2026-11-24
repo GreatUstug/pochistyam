@@ -14,6 +14,7 @@ import (
 
 	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/pressly/goose"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 //go:embed migrations/*.sql
@@ -56,6 +57,7 @@ func main() {
 		log.Fatalf("Migration failed: %v", err)
 	}
 	log.Println("Migrations applied successfully!")
+	mux.Handle("/metrics", promhttp.Handler())
 	mux.HandleFunc("POST /register", auth.Reg(application))
 	mux.HandleFunc("POST /auth", auth.Auth(application))
 	mux.HandleFunc("POST /createRoom", auth.AuthMiddleware(rooms.CreateRoom(application)))
