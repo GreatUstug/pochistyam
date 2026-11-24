@@ -15,6 +15,7 @@ FROM alpine:latest
 WORKDIR /backend
 
 COPY --from=builder /backend/main .
+COPY --from=builder /backend/migrations ./migrations
 
 EXPOSE 8080
 
