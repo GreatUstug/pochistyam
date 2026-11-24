@@ -38,9 +38,14 @@ func Reg(application *app.App) http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+		token, err := GenerateToken(userId)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
-		err = json.NewEncoder(w).Encode(map[string]string{"userId": userId, "name": req.Name, "email": req.Email})
+		err = json.NewEncoder(w).Encode(AuthResponse{Token: token, UserID: userId, Name: req.Name})
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -50,6 +55,31 @@ func Reg(application *app.App) http.HandlerFunc {
 
 func Auth(application *app.App) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var req AuthRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
 
+		var userId, dbHash, name string
+		err := application.DB.Pool.QueryRow(r.Context(), `SELECT id, password_hash, name FROM users WHERE email = $1`, req.Email).Scan(&userId, &dbHash, &name)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		if err = bcrypt.CompareHashAndPassword([]byte(dbHash), []byte(req.Password)); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		token, err := GenerateToken(userId)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		if err = json.NewEncoder(w).Encode(AuthResponse{Token: token, UserID: userId, Name: name}); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
 }
