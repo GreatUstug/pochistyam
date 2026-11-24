@@ -25,8 +25,7 @@ func CreateRoom(app *app.App) http.HandlerFunc {
 		var room RoomResponse
 		err := app.DB.Pool.QueryRow(r.Context(), `INSERT INTO rooms (user_id, name, width, height, dirtiness, needs_cleaning)
 	VALUES($1, $2, $3, $4, 0.0, false)
-	RETURNING id, name, width, height, dirtiness, needs_cleaning`,
-			userID, req.Name, req.Width, req.Height).Scan(
+	RETURNING id, name, width, height, dirtiness, needs_cleaning`, userID, req.Name, req.Width, req.Height).Scan(
 			&room.ID,
 			&room.Name,
 			&room.Width,

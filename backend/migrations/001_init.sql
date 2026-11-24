@@ -18,9 +18,6 @@ CREATE TABLE IF NOT EXISTS "rooms"(
 	created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
 	cleaned_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 	);
-INSERT INTO users (id, name, email, password_hash)
-VALUES ('00000000-0000-0000-0000-000000000000', 'Test User', 'test@test.com', 'dummy_hash')
-ON CONFLICT (id) DO NOTHING;
 -- +goose Down
 DROP TABLE IF EXISTS "users";
 DROP TABLE IF EXISTS "rooms";
