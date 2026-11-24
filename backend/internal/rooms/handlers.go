@@ -8,6 +8,11 @@ import (
 
 func CreateRoom(app *app.App) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		userID, ok := r.Context().Value("userID").(string)
+		if !ok {
+			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+			return
+		}
 		var req CreateRoomRequest
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -21,7 +26,7 @@ func CreateRoom(app *app.App) http.HandlerFunc {
 		err := app.DB.Pool.QueryRow(r.Context(), `INSERT INTO rooms (user_id, name, width, height, dirtiness, needs_cleaning)
 	VALUES($1, $2, $3, $4, 0.0, false)
 	RETURNING id, name, width, height, dirtiness, needs_cleaning`,
-			"00000000-0000-0000-0000-000000000000", req.Name, req.Width, req.Height).Scan(
+			userID, req.Name, req.Width, req.Height).Scan(
 			&room.ID,
 			&room.Name,
 			&room.Width,
@@ -44,7 +49,12 @@ func CreateRoom(app *app.App) http.HandlerFunc {
 
 func GetAllRooms(app *app.App) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		rows, err := app.DB.Pool.Query(r.Context(), "SELECT id, name, width, height, dirtiness, needs_cleaning FROM rooms WHERE user_id = $1 ORDER BY id ASC", "00000000-0000-0000-0000-000000000000")
+		userID, ok := r.Context().Value("userID").(string)
+		if !ok {
+			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+			return
+		}
+		rows, err := app.DB.Pool.Query(r.Context(), "SELECT id, name, width, height, dirtiness, needs_cleaning FROM rooms WHERE user_id = $1 ORDER BY id ASC", userID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

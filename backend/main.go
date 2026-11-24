@@ -56,10 +56,10 @@ func main() {
 		log.Fatalf("Migration failed: %v", err)
 	}
 	log.Println("Migrations applied successfully!")
-	mux.HandleFunc("POST /createRoom", rooms.CreateRoom(application))
-	mux.HandleFunc("GET /rooms", rooms.GetAllRooms(application))
 	mux.HandleFunc("POST /register", auth.Reg(application))
 	mux.HandleFunc("POST /auth", auth.Auth(application))
+	mux.HandleFunc("POST /createRoom", auth.AuthMiddleware(rooms.CreateRoom(application)))
+	mux.HandleFunc("GET /rooms", auth.AuthMiddleware(rooms.GetAllRooms(application)))
 
 	fmt.Println("Listening on port 8080")
 	err := http.ListenAndServe(":8080", mux)
