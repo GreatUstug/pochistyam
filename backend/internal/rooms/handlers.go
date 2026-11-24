@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"net/http"
 	"pochistyam/internal/app"
+	"pochistyam/internal/auth"
 )
 
 func CreateRoom(app *app.App) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		userID, ok := r.Context().Value("userID").(string)
+		userID, ok := r.Context().Value(auth.UserIDKey).(string)
 		if !ok {
 			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 			return
@@ -48,7 +49,7 @@ func CreateRoom(app *app.App) http.HandlerFunc {
 
 func GetAllRooms(app *app.App) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		userID, ok := r.Context().Value("userID").(string)
+		userID, ok := r.Context().Value(auth.UserIDKey).(string)
 		if !ok {
 			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 			return
@@ -59,7 +60,7 @@ func GetAllRooms(app *app.App) http.HandlerFunc {
 			return
 		}
 		defer rows.Close()
-		var rooms []RoomResponse
+		rooms := []RoomResponse{}
 		for rows.Next() {
 			var room RoomResponse
 			if err := rows.Scan(&room.ID, &room.Name, &room.Width, &room.Height, &room.Dirtiness, &room.NeedsCleaning); err != nil {
