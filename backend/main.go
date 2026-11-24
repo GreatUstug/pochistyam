@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"pochistyam/internal/app"
+	"pochistyam/internal/auth"
 	"pochistyam/internal/db"
 	"pochistyam/internal/rooms"
 
@@ -28,13 +29,13 @@ func main() {
 	application := app.NewApp(database)
 	mux := http.NewServeMux()
 
-	db := stdlib.OpenDBFromPool(database.Pool)
+	dbFromPool := stdlib.OpenDBFromPool(database.Pool)
 	defer func(db *sql.DB) {
 		err := db.Close()
 		if err != nil {
 			log.Fatal(err)
 		}
-	}(db)
+	}(dbFromPool)
 
 	const migrationsDir = "./migrations"
 
@@ -47,12 +48,13 @@ func main() {
 	}
 
 	log.Println("Running migrations...")
-	if err := goose.Up(db, migrationsDir); err != nil {
+	if err := goose.Up(dbFromPool, migrationsDir); err != nil {
 		log.Fatalf("Migration failed: %v", err)
 	}
 	log.Println("Migrations applied successfully!")
 	mux.HandleFunc("POST /createRoom", rooms.CreateRoom(application))
 	mux.HandleFunc("GET /rooms", rooms.GetAllRooms(application))
+	mux.HandleFunc("POST /reister", auth.Reg(application))
 
 	fmt.Println("Listening on port 8080")
 	err := http.ListenAndServe(":8080", mux)
