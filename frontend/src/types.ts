@@ -1,13 +1,18 @@
 export type Room = {
-    id: number
-    name: string
-    width: number
-    height: number
-    dirtiness: number
-    needsCleaning: boolean
-}
+    id: string;
+    name: string;
+    width: number;
+    height: number;
+    dirtiness: number;
+    needsCleaning: boolean;
+};
 
-export type RoomRequest = {
-    clientId: string
-    roomId: number
-}
+export type CreateRoomRequest = {
+    name: string;
+    width: number;
+    height: number;
+};
+
+export type RoomsListResponse = {
+    rooms: Room[];
+};
