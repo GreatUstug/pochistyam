@@ -7,19 +7,13 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"pochistyam/internal/app"
+	"pochistyam/internal/db"
+	"pochistyam/internal/rooms"
 
 	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/pressly/goose"
 )
-
-type RoomRequest struct {
-	ClientID string `json:"clientId"`
-	RoomID   int    `json:"roomId"`
-}
-
-type App struct {
-	DB *DB
-}
 
 //go:embed migrations/*.sql
 var embedMigrations embed.FS
@@ -29,9 +23,9 @@ func main() {
 	if dsn == "" {
 		log.Fatal("DATABASE_URL environment variable not set")
 	}
-	database := NewDB(dsn)
+	database := db.NewDB(dsn)
 	defer database.Pool.Close()
-	app := &App{database}
+	application := app.NewApp(database)
 	mux := http.NewServeMux()
 
 	db := stdlib.OpenDBFromPool(database.Pool)
@@ -57,8 +51,8 @@ func main() {
 		log.Fatalf("Migration failed: %v", err)
 	}
 	log.Println("Migrations applied successfully!")
-	mux.HandleFunc("POST /createRoom", app.CreateRoom)
-	mux.HandleFunc("GET /rooms", app.GetAllRooms)
+	mux.HandleFunc("POST /createRoom", rooms.CreateRoom(application))
+	mux.HandleFunc("GET /rooms", rooms.GetAllRooms(application))
 
 	fmt.Println("Listening on port 8080")
 	err := http.ListenAndServe(":8080", mux)
