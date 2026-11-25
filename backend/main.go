@@ -12,14 +12,26 @@ import (
 	"pochistyam/internal/db"
 	"pochistyam/internal/rooms"
 
+	_ "pochistyam/docs"
+
 	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/pressly/goose"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	httpSwagger "github.com/swaggo/http-swagger/v2"
 )
 
 //go:embed migrations/*.sql
 var embedMigrations embed.FS
 
+// @title           Pochistyam API
+// @version         1.0
+// @description     Менеджер уборки по комнатам
+// @host            localhost:8080
+// @BasePath        /
+// @securityDefinitions.apikey BearerAuth
+// @in              header
+// @name            Authorization
+// @description     Введите "Bearer <токен>"
 func main() {
 	dsn := os.Getenv("DATABASE_URL")
 	if dsn == "" {
@@ -62,6 +74,9 @@ func main() {
 	mux.HandleFunc("POST /auth", auth.Auth(application))
 	mux.HandleFunc("POST /createRoom", auth.AuthMiddleware(rooms.CreateRoom(application)))
 	mux.HandleFunc("GET /rooms", auth.AuthMiddleware(rooms.GetAllRooms(application)))
+	mux.Handle("/swagger/", httpSwagger.Handler(
+		httpSwagger.URL("http://localhost:8080/swagger/doc.json"),
+	))
 
 	fmt.Println("Listening on port 8080")
 	err := http.ListenAndServe(":8080", mux)
