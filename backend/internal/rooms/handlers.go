@@ -7,6 +7,17 @@ import (
 	"pochistyam/internal/auth"
 )
 
+// CreateRoom создает новую комнату
+// @Summary      Создать комнату
+// @Description  Создает комнату для текущего пользователя
+// @Tags         rooms
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        request body CreateRoomRequest true "Данные комнаты"
+// @Success      201 {object} RoomResponse
+// @Failure      401 {string} string "Unauthorized"
+// @Router       /createRoom [post]
 func CreateRoom(app *app.App) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID, ok := r.Context().Value(auth.UserIDKey).(string)
@@ -47,6 +58,16 @@ func CreateRoom(app *app.App) http.HandlerFunc {
 	}
 }
 
+// GetAllRooms отдает список всех комнат
+// @Summary      Демонстрация всех комнат пользователя
+// @Description  Демонстрация всех комнат пользователя
+// @Tags         rooms
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200 {array} RoomResponse
+// @Failure      500 {string} string "InternalServerError"
+// @Router       /rooms [get]
 func GetAllRooms(app *app.App) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID, ok := r.Context().Value(auth.UserIDKey).(string)
