@@ -9,6 +9,16 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// Reg Регистрирует нового пользователя
+// @Summary      Регистрация пользователя
+// @Description  Регистрирует нового пользователя
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        request body RegisterRequest true "Данные комнаты"
+// @Success      201 {object} AuthResponse
+// @Failure      500 {string} string "StatusInternalServerError"
+// @Router       /register [post]
 func Reg(application *app.App) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req RegisterRequest
@@ -53,6 +63,16 @@ func Reg(application *app.App) http.HandlerFunc {
 	}
 }
 
+// Auth Аутентифицирует существующего пользователя
+// @Summary      Аутентификация пользователя
+// @Description  Аутентифицирует существующего пользователя
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        request body AuthRequest true "Данные комнаты"
+// @Success      201 {object} AuthResponse
+// @Failure      500 {string} string "StatusInternalServerError"
+// @Router       /auth [post]
 func Auth(application *app.App) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req AuthRequest
