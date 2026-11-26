@@ -4,9 +4,11 @@ go 1.26.0
 
 require (
 	github.com/golang-jwt/jwt/v5 v5.3.1
+	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.13.0
 	github.com/pressly/goose v2.7.0+incompatible
 	github.com/prometheus/client_golang v1.25.0
+	github.com/redis/go-redis/v9 v9.24.0
 	github.com/swaggo/http-swagger/v2 v2.0.2
 	github.com/swaggo/swag v1.16.6
 	golang.org/x/crypto v0.59.0
@@ -34,7 +36,6 @@ require (
 	github.com/prometheus/client_model v0.6.3 // indirect
 	github.com/prometheus/common v0.72.0 // indirect
 	github.com/prometheus/procfs v0.22.0 // indirect
-	github.com/redis/go-redis/v9 v9.24.0 // indirect
 	github.com/swaggo/files/v2 v2.0.2 // indirect
 	go.uber.org/atomic v1.12.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.6 // indirect
