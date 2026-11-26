@@ -100,6 +100,29 @@ const docTemplate = `{
                 }
             }
         },
+        "/logOut": {
+            "post": {
+                "description": "Выход пользователя из текущей сессии",
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Дает пользователю выйти из текущей сессии",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "StatusForbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/register": {
             "post": {
                 "description": "Регистрирует нового пользователя",

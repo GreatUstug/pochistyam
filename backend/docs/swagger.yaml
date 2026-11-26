@@ -110,6 +110,21 @@ paths:
       summary: Создать комнату
       tags:
       - rooms
+  /logOut:
+    post:
+      description: Выход пользователя из текущей сессии
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "403":
+          description: StatusForbidden
+          schema:
+            type: string
+      summary: Дает пользователю выйти из текущей сессии
+      tags:
+      - auth
   /register:
     post:
       consumes:
