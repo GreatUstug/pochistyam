@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"net/http"
+	"pochistyam/internal/cache"
 	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -48,7 +49,18 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 			http.Error(w, "User ID not found in token", http.StatusUnauthorized)
 			return
 		}
-
+		jti, ok := claims["jti"].(string)
+		if !ok {
+			http.Error(w, "JTI not found in token", http.StatusUnauthorized)
+			return
+		}
+		if cache.RedisClient != nil {
+			exists, _ := cache.RedisClient.Exists(r.Context(), "blacklist"+jti).Result()
+			if exists > 0 {
+				http.Error(w, "User already blacklisted", http.StatusForbidden)
+				return
+			}
+		}
 		ctx := context.WithValue(r.Context(), UserIDKey, userID)
 		next(w, r.WithContext(ctx))
 	}
