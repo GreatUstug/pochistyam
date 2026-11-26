@@ -9,6 +9,7 @@ import (
 	"os"
 	"pochistyam/internal/app"
 	"pochistyam/internal/auth"
+	"pochistyam/internal/cache"
 	"pochistyam/internal/db"
 	"pochistyam/internal/rooms"
 
@@ -54,6 +55,10 @@ func main() {
 		log.Fatal(err)
 	}
 
+	if err := cache.InitRedis(); err != nil {
+		log.Printf("Warning: Redis not available: %v", err)
+	}
+
 	const migrationsDir = "./migrations"
 
 	if _, err := os.Stat(migrationsDir); os.IsNotExist(err) {
@@ -72,6 +77,7 @@ func main() {
 	mux.Handle("/metrics", promhttp.Handler())
 	mux.HandleFunc("POST /register", auth.Reg(application))
 	mux.HandleFunc("POST /auth", auth.Auth(application))
+	mux.HandleFunc("POST /logOut", auth.AuthMiddleware(auth.LogOut(application)))
 	mux.HandleFunc("POST /createRoom", auth.AuthMiddleware(rooms.CreateRoom(application)))
 	mux.HandleFunc("GET /rooms", auth.AuthMiddleware(rooms.GetAllRooms(application)))
 	mux.Handle("/swagger/", httpSwagger.Handler(
